@@ -15,7 +15,7 @@ class Crawler
         cli.h(longOpt:'help', 'print this help text')
         cli.f(longOpt:'from', args:1, argName:'date', required: true, 'Start of the interval (included) in format YYYY-MM-DD')
         cli.t(longOpt:'to', args:1, argName:'date', required: true, 'Start of the interval (included) in format YYYY-MM-DD')
-        cli._(longOpt:'directory', args:1, argName:'directory', required: true, 'Directory into which the results will be parsed')
+        cli.d(longOpt:'directory', args:1, argName:'directory', required: true, 'Directory into which the results will be parsed')
 
         // Process the options
         def options = cli.parse(args)

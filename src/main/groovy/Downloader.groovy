@@ -1,19 +1,18 @@
 import groovy.time.TimeCategory
-import org.jsoup.Connection
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
-import org.jsoup.select.Elements
 
 class Downloader
 {
-
-    private int timeout = 10000 // in miliseconds
     private int windowSize = 7   // in days
-    private String directory    // into which the decisions should be downloaded
+    private DocumentProcessor documentProcessor
+    private MetadataWriter metadataWriter
+    private metadata = []
+
+
 
     Downloader(String directory)
     {
-        this.directory = directory
+        documentProcessor = new DocumentProcessor(directory)
+        metadataWriter = new MetadataWriter(directory)
     }
 
     void execute(Date from, Date to, String signature)
@@ -27,8 +26,7 @@ class Downloader
 
         while (itemsCount != 0) {
             println ">>> Offset ${offset} (limit ${SupremeCourt.PER_PAGE} items)..."
-            def document = fetchUrl(SupremeCourt.BASE_URL, SupremeCourt.getParameters(from, to, signature, offset));
-            def pageItems = parseItems(document)
+            def pageItems = ResultsProcessor.process(Fetcher.fetchUrl(SupremeCourt.BASE_URL, SupremeCourt.getParameters(from, to, signature, offset)))
             allItems.putAll(pageItems)
             // Check limits
             if (allItems.size() >= SupremeCourt.RESULTSET_LIMIT) {
@@ -42,51 +40,13 @@ class Downloader
         println ">>> Downloading items content..."
         allItems.each {id, item ->
             println ">>> Item ${item['signature']}..."
-            def file = new File(directory + '/' + Helpers.getSafeName(item['signature']) + '.html')
-            def document = fetchUrl(item['url']);
-            document.select('body').attr('onload', '') // remove the print popup dialog
-            file << document.html()
+            metadata.add(documentProcessor.process(item['signature'], Fetcher.fetchUrl(item['url'])))
         }
-
-    }
-
-    private Document fetchUrl(String url)
-    {
-        return Jsoup.connect(url).timeout(timeout).get()
-    }
-
-    private Document fetchUrl(String url, parameters)
-    {
-        return Jsoup.connect(url).data(parameters).timeout(timeout).get();
-    }
-
-    private parseItems(Document document)
-    {
-        def items = [:]
-        Elements links = document.select('a[href~=/(WebPrint|WebSearch)/]') // Select all links containing these segments
-        links.each { link ->
-            def href = link.attr('href');
-            def match = href =~ /\/(WebPrint|WebSearch)\/(.*)\?/
-            if (!match) {
-                throw new RuntimeException("Invalid link")
-            }
-            def type = match.group(1)
-            def id = match.group(2) // TODO: sanitation, nektere veci maji vice cisel!
-            if (!items.containsKey(id)) {
-                items[id] = [:]
-            }
-            if (type == 'WebPrint') {
-                items[id]['url'] = link.attr('abs:href')
-            } else {
-                items[id]['signature'] = link.text()
-            }
-
-        }
-        return items
     }
 
     def fetchPeriod(from, to)
     {
+        // Process whole range [from, to] via fixed sized windows
         def signatures = [SupremeCourt.SIGNATURE_CDO, SupremeCourt.SIGNATURE_ODO, SupremeCourt.SIGNATURE_ODON, SupremeCourt.SIGNATURE_TDO]
         println "Fetching interval ${Helpers.formatDateInterval(from, to)} in windows: "
         use (TimeCategory) {
@@ -102,6 +62,9 @@ class Downloader
                 windowStart = windowStart + windowSize.days
             }
         }
+
+        // Dump metadata
+        metadataWriter.write(metadata, "index-${Helpers.formatDateInterval(from, to)}.csv")
     }
 }
 

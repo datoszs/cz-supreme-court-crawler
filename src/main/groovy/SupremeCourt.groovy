@@ -1,6 +1,14 @@
 class SupremeCourt
 {
-    public static final String SUPREME_COURT = 'Nejvyšší soud';
+    public static final String SUPREME_COURT = 'Nejvyšší soud'
+
+    public static final String COURT = 'Soud'
+    public static final String DECISION_DATE = 'Datum rozhodnutí'
+    public static final String SIGNATURE = 'Spisová značka'
+    public static final String ECLI = 'ECLI'
+    public static final String DECISION_TYPE = 'Typ rozhodnutí'
+    public static final String KEYWORD = 'Heslo'
+    public static final String DECISION_CATEGORY = 'Kategorie rozhodnutí'
 
     public static final String BASE_URL = "http://nsoud.cz/Judikatura/judikatura_ns.nsf/\$\$WebSearch1?SearchView"
 

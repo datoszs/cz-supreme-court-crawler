@@ -1,7 +1,18 @@
 group 'laywers-demo'
-version '1.0-SNAPSHOT'
+version '0.5'
 
 apply plugin: 'groovy'
+
+task completeJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'Czech Republic Supreme Court Crawler',
+                'Implementation-Version': version,
+                'Main-Class': 'Crawler'
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
 
 repositories {
     mavenCentral()
@@ -11,4 +22,5 @@ dependencies {
     compile 'org.codehaus.groovy:groovy-all:2.4.6'
     compile 'org.jsoup:jsoup:1.8.3'
     compile 'commons-cli:commons-cli:1.3.1'
+    compile 'net.sf.opencsv:opencsv:2.3'
 }
