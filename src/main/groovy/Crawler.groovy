@@ -45,10 +45,16 @@ class Crawler
         }
         if (from > to) {
             println "Date interval is invalid (possibly the start is later then the end)."
+            return
         }
         def folder = new File(options.directory)
         if (!folder.exists() || !folder.isDirectory()) {
             println "The destination directory is not a folder or doesn't exist (or permissions are wrong)."
+            return
+        }
+        if (folder.list().contains("documents") || folder.list().contains("metadata.csv")) {
+            println "The destination directory is not empty. Please remove content before proceeding."
+            return
         }
 
         Downloader downloader = new Downloader(options.directory);

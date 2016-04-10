@@ -15,7 +15,7 @@ class ResultsProcessor
                 throw new RuntimeException("Invalid link")
             }
             def type = match.group(1)
-            def id = match.group(2) // TODO: sanitation, nektere veci maji vice cisel!
+            def id = match.group(2)
             if (!items.containsKey(id)) {
                 items[id] = [:]
             }

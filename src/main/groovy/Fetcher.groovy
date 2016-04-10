@@ -3,7 +3,7 @@ import org.jsoup.nodes.Document
 
 class Fetcher {
 
-    private static final int TIMEOUT = 10000 // in miliseconds
+    private static final TIMEOUT = 10000 // in miliseconds
 
     public static Document fetchUrl(String url)
     {

@@ -2,7 +2,7 @@ import groovy.time.TimeCategory
 
 class Downloader
 {
-    private int windowSize = 7   // in days
+    private windowSize = 7   // in days
     private DocumentProcessor documentProcessor
     private MetadataWriter metadataWriter
     private metadata = []
@@ -40,14 +40,14 @@ class Downloader
         println ">>> Downloading items content..."
         allItems.each {id, item ->
             println ">>> Item ${item['signature']}..."
-            metadata.add(documentProcessor.process(item['signature'], Fetcher.fetchUrl(item['url'])))
+            metadata.addAll(documentProcessor.process(item['url'], Fetcher.fetchUrl(item['url'])))
         }
     }
 
     def fetchPeriod(from, to)
     {
         // Process whole range [from, to] via fixed sized windows
-        def signatures = [SupremeCourt.SIGNATURE_CDO, SupremeCourt.SIGNATURE_ODO, SupremeCourt.SIGNATURE_ODON, SupremeCourt.SIGNATURE_TDO]
+        def signatures = [SupremeCourt.REGISTRY_MASK_CDO, SupremeCourt.REGISTRY_MASK_ODO, SupremeCourt.REGISTRY_MASK_ODON]
         println "Fetching interval ${Helpers.formatDateInterval(from, to)} in windows: "
         use (TimeCategory) {
             def windowStart = from
@@ -64,7 +64,7 @@ class Downloader
         }
 
         // Dump metadata
-        metadataWriter.write(metadata, "index-${Helpers.formatDateInterval(from, to)}.csv")
+        metadataWriter.write(metadata, "metadata.csv")
     }
 }
 

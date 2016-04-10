@@ -1,16 +1,16 @@
 class SupremeCourt
 {
-    public static final String SUPREME_COURT = 'Nejvyšší soud'
+    public static final SUPREME_COURT = 'Nejvyšší soud'
 
-    public static final String COURT = 'Soud'
-    public static final String DECISION_DATE = 'Datum rozhodnutí'
-    public static final String SIGNATURE = 'Spisová značka'
-    public static final String ECLI = 'ECLI'
-    public static final String DECISION_TYPE = 'Typ rozhodnutí'
-    public static final String KEYWORD = 'Heslo'
-    public static final String DECISION_CATEGORY = 'Kategorie rozhodnutí'
+    public static final COURT = 'Soud'
+    public static final DECISION_DATE = 'Datum rozhodnutí'
+    public static final REGISTRY_MARK = 'Spisová značka'
+    public static final ECLI = 'ECLI'
+    public static final DECISION_TYPE = 'Typ rozhodnutí'
+    public static final KEYWORD = 'Heslo'
+    public static final DECISION_CATEGORY = 'Kategorie rozhodnutí'
 
-    public static final String BASE_URL = "http://nsoud.cz/Judikatura/judikatura_ns.nsf/\$\$WebSearch1?SearchView"
+    public static final BASE_URL = "http://nsoud.cz/Judikatura/judikatura_ns.nsf/\$\$WebSearch1?SearchView"
 
     public static final int LEGAL_SENTENCE_SHORT = 1;   // The shortest view as possible
 
@@ -18,15 +18,15 @@ class SupremeCourt
     public static final int PER_PAGE = 50;              // Theoretically the API allows up to 1000 per page, but the delay and unreliablity makes it risky.
     public static final int RESULTSET_LIMIT = 1000;     // The hardcoded limit of the API for number of results.
 
-    public static final String SIGNATURE_CDO = 'CDO';
-    public static final String SIGNATURE_TDO = 'TDO';
-    public static final String SIGNATURE_ODO = 'ODO';
-    public static final String SIGNATURE_ODON = 'ODON';
+    public static final REGISTRY_MASK_CDO = 'CDO';
+    public static final REGISTRY_MASK_TDO = 'TDO';
+    public static final REGISTRY_MASK_ODO = 'ODO';
+    public static final REGISTRY_MASK_ODON = 'ODON';
 
-    def static getParameters(Date from, Date to, String signature, int offset)
+    def static getParameters(Date from, Date to, String registry_mark, int offset)
     {
         def parameters = [
-            'Query': '[spzn2]=' + signature + ' AND [datum_predani_na_web]>=' + from.format('dd/MM/yyyy') + ' AND [datum_predani_na_web]<=' + to.format('dd/MM/yyyy') + ' AND [SoudCreate]="'+ SUPREME_COURT + '"',
+            'Query': '[spzn2]=' + registry_mark + ' AND [datum_predani_na_web]>=' + from.format('dd/MM/yyyy') + ' AND [datum_predani_na_web]<=' + to.format('dd/MM/yyyy') + ' AND [SoudCreate]="'+ SUPREME_COURT + '"',
             'SearchMax': Integer.toString(RESULTSET_LIMIT),
             'pohled': Integer.toString(LEGAL_SENTENCE_SHORT),
             'start': Integer.toString(offset),

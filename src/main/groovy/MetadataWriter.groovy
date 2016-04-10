@@ -2,6 +2,24 @@ import au.com.bytecode.opencsv.CSVWriter
 
 class MetadataWriter
 {
+    private columns = [
+            MetadataFormat.COURT_NAME,
+            MetadataFormat.REGISTRY_MARK,
+            MetadataFormat.DECISION_DATE,
+            MetadataFormat.WEB_PATH,
+            MetadataFormat.LOCAL_PATH,
+            MetadataFormat.ECLI,
+            MetadataFormat.DECISION_TYPE
+    ]
+    private mapping = [
+            SupremeCourt.COURT,
+            SupremeCourt.REGISTRY_MARK,
+            SupremeCourt.DECISION_DATE,
+            DocumentProcessor.WEB_PATH,
+            DocumentProcessor.LOCAL_PATH,
+            SupremeCourt.ECLI,
+            SupremeCourt.DECISION_TYPE
+    ]
     private String directory
 
     public MetadataWriter(String directory)
@@ -13,11 +31,10 @@ class MetadataWriter
     {
         Writer temp = new FileWriter(directory + '/' + indexFilename);
         CSVWriter writer = new CSVWriter(temp);
-        def String[] firstLine = [SupremeCourt.COURT, SupremeCourt.SIGNATURE, SupremeCourt.ECLI, SupremeCourt.DECISION_DATE, SupremeCourt.DECISION_CATEGORY, SupremeCourt.DECISION_TYPE, DocumentProcessor.PATH];
-        writer.writeNext(firstLine);
+        writer.writeNext(columns.toArray(new String[0]));
         metadata.each {item ->
             def List<String> line = []
-            firstLine.each {key ->
+            mapping.each {key ->
                 line.add(safeExtract(item, key))
             }
             writer.writeNext(line.toArray(new String[0]))
