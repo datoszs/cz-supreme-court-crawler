@@ -1,64 +1,80 @@
-import java.text.DateFormat
-import java.text.SimpleDateFormat
+import groovy.time.TimeCategory
 
 /**
- * Utility for crawling Supreme Court of Czech Republic to obtain a list of court decision in given period
- * For now it only fetch only chosen subset of results!
+ * Crawl search court search to download decision document in given period using windowing to prevent exceeding API limits.
+ * registry ma
  */
-
 class Crawler
 {
-    static void main(String[] args)
+    final static String METADATA_FILE = 'metadata.csv'
+    final static String DOCUMENTS_DIRECTORY = 'documents'
+
+    int windowLength
+    String[] registryMarks
+    int intervalType
+
+    DocumentProcessor documentProcessor
+    MetadataWriter metadataWriter
+
+    def metadata = []
+
+    Crawler(String directory, int windowLength, String[] registryMarks, int intervalType)
     {
-        // Configure CLI argument parser
-        def cli = new CliBuilder(usage:'crawler [options] <directory>', header:'Parameters:');
-        cli.h(longOpt:'help', 'print this help text')
-        cli.f(longOpt:'from', args:1, argName:'date', required: true, 'Start of the interval (included) in format YYYY-MM-DD')
-        cli.t(longOpt:'to', args:1, argName:'date', required: true, 'Start of the interval (included) in format YYYY-MM-DD')
-        cli.d(longOpt:'directory', args:1, argName:'directory', required: true, 'Directory into which the results will be parsed')
+        this.windowLength = windowLength
+        this.registryMarks = registryMarks
+        this.intervalType = intervalType
 
-        // Process the options
-        def options = cli.parse(args)
-        if (!options) {
-            return
-        }
-        if(options.h) {
-            cli.usage()
-        }
-        // Processing params
-        Date from
-        Date to
-        // Start serving the request
-        DateFormat dateFormat = new SimpleDateFormat('yyyy-MM-dd');
+        documentProcessor = new DocumentProcessor(directory)
+        metadataWriter = new MetadataWriter(directory)
+    }
 
-        try {
-            from = dateFormat.parse(options.f)
-        } catch (all) {
-            println "Date format of date from is invalid."
-            return
-        }
-        try {
-            to = dateFormat.parse(options.t)
-        } catch (all) {
-            println "Date format of date to is invalid."
-            return
-        }
-        if (from > to) {
-            println "Date interval is invalid (possibly the start is later then the end)."
-            return
-        }
-        def folder = new File(options.directory)
-        if (!folder.exists() || !folder.isDirectory()) {
-            println "The destination directory is not a folder or doesn't exist (or permissions are wrong)."
-            return
-        }
-        if (folder.list().contains("documents") || folder.list().contains("metadata.csv")) {
-            println "The destination directory is not empty. Please remove content before proceeding."
-            return
+    void execute(Date from, Date to, String mark)
+    {
+        println ">>> Downloading items list for ${Helpers.formatDateInterval(from, to)}"
+
+        def allItems = [:]
+        int offset = SupremeCourt.DEFAULT_OFFSET
+        int itemsCount = -1;
+
+        while (itemsCount != 0) {
+            println ">>> Offset ${offset} (limit ${SupremeCourt.PER_PAGE} items)..."
+            def pageItems = ResultsProcessor.process(Fetcher.fetchUrl(SupremeCourt.BASE_URL, SupremeCourt.getParameters(intervalType, from, to, mark, offset)))
+            allItems.putAll(pageItems)
+            // Check limits
+            if (allItems.size() >= SupremeCourt.RESULTSET_LIMIT) {
+                throw new TooManyItemsException('Query returned more than maximal limit of results. Quitting as the result wouldn\'t be reliable complete.')
+            }
+            // Prepare next iteration
+            itemsCount = pageItems.size()
+            offset += SupremeCourt.PER_PAGE
         }
 
-        Downloader downloader = new Downloader(options.directory);
-        downloader.fetchPeriod(from, to)
+        println ">>> Downloading items content..."
+        allItems.each {id, item ->
+            println ">>> Item ${item['signature']}..."
+            metadata.addAll(documentProcessor.process(item['url'], Fetcher.fetchUrl(item['url'])))
+        }
+    }
+
+    void fetchPeriod(from, to)
+    {
+        // Process whole range [from, to] via fixed sized windows
+        println "Fetching interval ${Helpers.formatDateInterval(from, to)} in windows: "
+        use (TimeCategory) {
+            Date windowStart = from
+            Date windowEnd = ((windowStart + windowLength.days) < to) ? windowStart + windowLength.days : to
+            while (windowStart <= windowEnd) {
+                windowEnd = ((windowStart + windowLength.days) < to) ? windowStart + windowLength.days : to
+                registryMarks.each {mark ->
+                    println ">> Registry mark ${mark}"
+                    execute(windowStart, windowEnd, mark)
+                }
+                windowStart = windowStart + windowLength.days
+            }
+        }
+
+        // At the end dump the metadata into CSV
+        metadataWriter.write(metadata, METADATA_FILE)
     }
 }
 

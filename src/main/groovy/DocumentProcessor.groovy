@@ -5,17 +5,17 @@ import org.jsoup.select.Elements
 class DocumentProcessor
 {
 
-    public static final WEB_PATH = 'web_path'
-    public static final LOCAL_PATH = 'local_path'
+    static final String WEB_PATH = 'web_path'
+    static final String LOCAL_PATH = 'local_path'
 
-    private String directory    // Directory to download decisions into
+    String directory    // Directory to download decisions into
 
-    public DocumentProcessor(String directory)
+    DocumentProcessor(String directory)
     {
         this.directory = directory
     }
 
-    public process(String url, Document document)
+    def process(String url, Document document)
     {
         document.select('body').attr('onload', '') // Remove the print popup dialog
         document.select('div.tlacitko').remove(); // Remove the back button
@@ -33,7 +33,7 @@ class DocumentProcessor
             Element row = rows.get(i);
             Elements cols = row.select("td");
             if (cols.size() >= 2) {
-                def key = sanitizeKey(cols.get(0).text())
+                def key = Helpers.removeTrailingColon(cols.get(0).text())
                 if (key == SupremeCourt.REGISTRY_MARK) {
                     // ignored explicitly, we extract this information from ECLI
                 } else if (key == SupremeCourt.DECISION_DATE) {
@@ -46,7 +46,7 @@ class DocumentProcessor
             }
         }
         // Prepare output directory
-        def baseDirectory = directory + '/documents/'
+        String baseDirectory = directory + '/'+ Crawler.DOCUMENTS_DIRECTORY +'/'
         new File(baseDirectory).mkdirs()
 
         // Expand to multiple documents according to ECLI
@@ -64,13 +64,5 @@ class DocumentProcessor
             items.add(temp)
         }
         return items
-    }
-
-    private static sanitizeKey(String value)
-    {
-        if (value.endsWith(':')) {
-            return value.substring(0, value.length() - 1)
-        }
-        return value
     }
 }

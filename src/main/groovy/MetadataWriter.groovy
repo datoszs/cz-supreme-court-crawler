@@ -1,8 +1,11 @@
 import au.com.bytecode.opencsv.CSVWriter
 
+/**
+ * Maps and writes extracted information into metadata according to its format.
+ */
 class MetadataWriter
 {
-    private columns = [
+    def columns = [
             MetadataFormat.COURT_NAME,
             MetadataFormat.REGISTRY_MARK,
             MetadataFormat.DECISION_DATE,
@@ -11,7 +14,7 @@ class MetadataWriter
             MetadataFormat.ECLI,
             MetadataFormat.DECISION_TYPE
     ]
-    private mapping = [
+    def mapping = [
             SupremeCourt.COURT,
             SupremeCourt.REGISTRY_MARK,
             SupremeCourt.DECISION_DATE,
@@ -20,14 +23,14 @@ class MetadataWriter
             SupremeCourt.ECLI,
             SupremeCourt.DECISION_TYPE
     ]
-    private String directory
+    String directory
 
-    public MetadataWriter(String directory)
+    MetadataWriter(String directory)
     {
         this.directory = directory
     }
 
-    public write(List<Map<String, String>> metadata, String indexFilename)
+    void write(List<Map<String, String>> metadata, String indexFilename)
     {
         Writer temp = new FileWriter(directory + '/' + indexFilename);
         CSVWriter writer = new CSVWriter(temp);
@@ -42,7 +45,7 @@ class MetadataWriter
         writer.close();
     }
 
-    private static safeExtract(Map<String, String> item, String key)
+    static String safeExtract(Map<String, String> item, String key)
     {
         if (item.containsKey(key)) {
             return item[key];

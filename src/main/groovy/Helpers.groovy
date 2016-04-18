@@ -42,4 +42,12 @@ class Helpers
         return null;
 
     }
+
+    def static removeTrailingColon(String value)
+    {
+        if (value.endsWith(':')) {
+            return value.substring(0, value.length() - 1)
+        }
+        return value
+    }
 }

@@ -1,5 +1,5 @@
-group 'laywers-demo'
-version '0.5'
+group 'cz-supreme-court-crawler'
+version '1.0'
 
 apply plugin: 'groovy'
 
@@ -7,7 +7,7 @@ task completeJar(type: Jar) {
     manifest {
         attributes 'Implementation-Title': 'Czech Republic Supreme Court Crawler',
                 'Implementation-Version': version,
-                'Main-Class': 'Crawler'
+                'Main-Class': 'Executor'
     }
     baseName = project.name + '-all'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }

@@ -3,14 +3,14 @@ import org.jsoup.nodes.Document
 
 class Fetcher {
 
-    private static final TIMEOUT = 10000 // in miliseconds
+    static final int TIMEOUT = 10000 // in miliseconds
 
-    public static Document fetchUrl(String url)
+    static Document fetchUrl(String url)
     {
         return Jsoup.connect(url).timeout(TIMEOUT).get()
     }
 
-    public static Document fetchUrl(String url, parameters)
+    static Document fetchUrl(String url, Map<String, String> parameters)
     {
         return Jsoup.connect(url).data(parameters).timeout(TIMEOUT).get();
     }

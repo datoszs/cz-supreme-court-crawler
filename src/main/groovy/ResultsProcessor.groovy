@@ -1,10 +1,13 @@
 import org.jsoup.nodes.Document
 import org.jsoup.select.Elements
 
+/**
+ * Parses given result overview page and extract list of document IDs together with link leading to full document.
+ */
 class ResultsProcessor
 {
 
-    public static process(Document document)
+    def static process(Document document)
     {
         def items = [:]
         Elements links = document.select('a[href~=/(WebPrint|WebSearch)/]') // Select all links containing these segments
@@ -24,7 +27,6 @@ class ResultsProcessor
             } else {
                 items[id]['signature'] = link.text()
             }
-
         }
         return items
     }
