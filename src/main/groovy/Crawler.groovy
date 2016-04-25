@@ -15,14 +15,17 @@ class Crawler
 
     DocumentProcessor documentProcessor
     MetadataWriter metadataWriter
+    Fetcher fetcher
 
     def metadata = []
 
-    Crawler(String directory, int windowLength, String[] registryMarks, int intervalType)
+    Crawler(String directory, int windowLength, String[] registryMarks, int intervalType, Integer fetchAttempts, boolean waitOnFail)
     {
         this.windowLength = windowLength
         this.registryMarks = registryMarks
         this.intervalType = intervalType
+
+        this.fetcher = new Fetcher(fetchAttempts, waitOnFail)
 
         documentProcessor = new DocumentProcessor(directory)
         metadataWriter = new MetadataWriter(directory)
@@ -38,7 +41,7 @@ class Crawler
 
         while (itemsCount != 0) {
             println ">>> Offset ${offset} (limit ${SupremeCourt.PER_PAGE} items)..."
-            def pageItems = ResultsProcessor.process(Fetcher.fetchUrl(SupremeCourt.BASE_URL, SupremeCourt.getParameters(intervalType, from, to, mark, offset)))
+            def pageItems = ResultsProcessor.process(fetcher.fetchUrl(SupremeCourt.BASE_URL, SupremeCourt.getParameters(intervalType, from, to, mark, offset)))
             allItems.putAll(pageItems)
             // Check limits
             if (allItems.size() >= SupremeCourt.RESULTSET_LIMIT) {
@@ -52,7 +55,7 @@ class Crawler
         println ">>> Downloading items content..."
         allItems.each {id, item ->
             println ">>> Item ${item['signature']}..."
-            metadata.addAll(documentProcessor.process(item['url'], Fetcher.fetchUrl(item['url'])))
+            metadata.addAll(documentProcessor.process(item['url'], fetcher.fetchUrl(item['url'])))
         }
     }
 

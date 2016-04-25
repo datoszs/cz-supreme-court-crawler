@@ -22,6 +22,8 @@ class Executor
         cli._(longOpt: 'decision-date', required: false, 'Obtain results based on decision date (default).')
         cli._(longOpt: 'registry-marks', args: 1, argName: 'MARKS', required: true, 'Comma separated list of registry marks to crawl.')
         cli._(longOpt: 'window', args: 1, argName: 'DAYS', required: false, 'Length of crawling window to workaround maximal number of results. Default value is 14 days.')
+        cli._(longOpt: 'fetch-attempts', args: 1, argName: 'COUNT', required: false, 'Number of attempts to fetch remote documents.')
+        cli._(longOpt: 'wait-on-fail', required: false, 'Whether to wait on explicit user feedback on failed fetch attempts.')
 
         // Process the options
         def options = cli.parse(args)
@@ -63,6 +65,26 @@ class Executor
             println "The destination directory is not empty. Please remove content before proceeding."
             System.exit(1)
         }
+        Integer fetchAttempts = 1
+        if (options.'fetch-attempts') {
+            try {
+                fetchAttempts = (options.'fetch-attempts').toInteger()
+                if (fetchAttempts < 0) {
+                    throw new Exception()
+                }
+                if (fetchAttempts == 0) { // transform 0 into null as that means unlimited
+                    fetchAttempts = null
+                }
+            } catch (all) {
+                println "The number of fetch attempts is invalid. Please provide non negative number."
+                System.exit(1)
+            }
+        }
+        boolean waitOnFail = options.'wait-on-fail'
+        if (fetchAttempts == null && !waitOnFail) {
+            println "Unlimited number of fetch attempts without --wait-on-fail option is invalid."
+            System.exit(1)
+        }
         boolean usePublicationDate = options.'publication-date'
         boolean useDecisionDate = options.'decision-date'
         if (!usePublicationDate && !useDecisionDate) {
@@ -89,7 +111,7 @@ class Executor
 
         String[] registryMarks = (options.'registry-marks').split(',')
 
-        Crawler crawler = new Crawler(folder.getAbsolutePath(), window, registryMarks, intervalType);
+        Crawler crawler = new Crawler(folder.getAbsolutePath(), window, registryMarks, intervalType, fetchAttempts, waitOnFail);
         try {
             crawler.fetchPeriod(from, to)
         } catch (TooManyItemsException exception) {
