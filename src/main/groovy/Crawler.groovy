@@ -65,9 +65,9 @@ class Crawler
         println "Fetching interval ${Helpers.formatDateInterval(from, to)} in windows: "
         use (TimeCategory) {
             Date windowStart = from
-            Date windowEnd = ((windowStart + windowLength.days) < to) ? windowStart + windowLength.days : to
-            while (windowStart <= windowEnd) {
-                windowEnd = ((windowStart + windowLength.days) < to) ? windowStart + windowLength.days : to
+            Date windowEnd = ((windowStart + (windowLength - 1).days) < to) ? windowStart + (windowLength - 1).days : to
+            while (windowStart <= to) {
+                windowEnd = ((windowStart + (windowLength - 1).days) < to) ? windowStart + (windowLength - 1).days : to
                 registryMarks.each {mark ->
                     println ">> Registry mark ${mark}"
                     execute(windowStart, windowEnd, mark)
