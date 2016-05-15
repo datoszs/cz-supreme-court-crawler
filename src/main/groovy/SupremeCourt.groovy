@@ -20,7 +20,7 @@ class SupremeCourt
 
     static final int LEGAL_SENTENCE_SHORT = 1;   // The shortest view as possible
 
-    static final int DEFAULT_OFFSET = 0;
+    static final int DEFAULT_OFFSET = 1;         // Start is from 1, using 0 leads to unexpected sorting and unstable results!
     static final int PER_PAGE = 50;              // Theoretically the API allows up to 1000 per page, but the delay and unreliablity makes it risky.
     static final int RESULTSET_LIMIT = 1000;     // The hard-coded limit of the API for number of results. When this limit is exceeded by the query then the result is inherently incomplete.
 
