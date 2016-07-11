@@ -38,21 +38,29 @@ class Crawler
         def allItems = [:]
         int offset = SupremeCourt.DEFAULT_OFFSET
         int itemsCount = -1;
+        def beforeAdd = 0;
 
         while (itemsCount != 0) {
             println ">>> Offset ${offset} (limit ${SupremeCourt.PER_PAGE} items)..."
             def pageItems = ResultsProcessor.process(fetcher.fetchUrl(SupremeCourt.BASE_URL, SupremeCourt.getParameters(intervalType, from, to, mark, offset)))
+            beforeAdd = allItems.size()
             allItems.putAll(pageItems)
             // Check limits
             if (allItems.size() >= SupremeCourt.RESULTSET_LIMIT) {
                 throw new TooManyItemsException('Query returned more than maximal limit of results. Quitting as the result wouldn\'t be reliable complete.')
             }
             // Prepare next iteration
+            if (beforeAdd + pageItems.size() != allItems.size()) {
+                println "Warning: " + ((beforeAdd + pageItems.size()) - allItems.size()) + " items already present in the result list!"
+            }
+            println "Page items " + pageItems.size()
+            println "Total items " + allItems.size()
             itemsCount = pageItems.size()
             offset += SupremeCourt.PER_PAGE
         }
 
         println ">>> Downloading items content..."
+        documentProcessor.prepareDocumentsDirectory()
         allItems.each {id, item ->
             println ">>> Item ${item['signature']}..."
             metadata.addAll(documentProcessor.process(item['url'], fetcher.fetchUrl(item['url'])))

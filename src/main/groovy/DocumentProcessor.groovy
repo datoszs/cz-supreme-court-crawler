@@ -46,8 +46,7 @@ class DocumentProcessor
             }
         }
         // Prepare output directory
-        String baseDirectory = directory + '/'+ Crawler.DOCUMENTS_DIRECTORY +'/'
-        new File(baseDirectory).mkdirs()
+        String baseDirectory = prepareDocumentsDirectory()
 
         // Expand to multiple documents according to ECLI
         // and store file under ECLI (which is unique) in documents folder
@@ -64,5 +63,12 @@ class DocumentProcessor
             items.add(temp)
         }
         return items
+    }
+
+    def prepareDocumentsDirectory()
+    {
+        String baseDirectory = directory + '/'+ Crawler.DOCUMENTS_DIRECTORY +'/'
+        new File(baseDirectory).mkdirs()
+        return baseDirectory
     }
 }
