@@ -7,6 +7,7 @@ class MetadataWriter
 {
     def columns = [
             MetadataFormat.COURT_NAME,
+            MetadataFormat.RECORD_ID,
             MetadataFormat.REGISTRY_MARK,
             MetadataFormat.DECISION_DATE,
             MetadataFormat.WEB_PATH,
@@ -16,6 +17,7 @@ class MetadataWriter
     ]
     def mapping = [
             SupremeCourt.COURT,
+            SupremeCourt.ECLI,
             SupremeCourt.REGISTRY_MARK,
             SupremeCourt.DECISION_DATE,
             DocumentProcessor.WEB_PATH,

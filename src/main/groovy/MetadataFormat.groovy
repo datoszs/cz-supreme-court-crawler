@@ -5,6 +5,7 @@ class MetadataFormat
 {
     // Mandatory items
     static final String COURT_NAME = 'court_name';
+    static final String RECORD_ID = 'record_id'
     static final String REGISTRY_MARK = 'registry_mark';
     static final String DECISION_DATE = 'decision_date';
     static final String WEB_PATH = 'web_path';
