@@ -35,7 +35,7 @@ class MetadataWriter
     void write(List<Map<String, String>> metadata, String indexFilename)
     {
         Writer temp = new FileWriter(directory + '/' + indexFilename);
-        CSVWriter writer = new CSVWriter(temp);
+        CSVWriter writer = new CSVWriter(temp, ';' as char);
         writer.writeNext(columns.toArray(new String[0]));
         metadata.each {item ->
             def List<String> line = []
