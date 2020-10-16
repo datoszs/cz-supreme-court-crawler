@@ -37,7 +37,8 @@ class SupremeCourt
             'SearchMax': Integer.toString(RESULTSET_LIMIT),
             'pohled': Integer.toString(LEGAL_SENTENCE_SHORT),
             'start': Integer.toString(offset),
-            'count': Integer.toString(PER_PAGE)
+            'count': Integer.toString(PER_PAGE),
+            'searchOrder': Integer.toString(4),
         ];
         return parameters
     }
